@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IoT Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 40px; }
+    button { padding: 10px 20px; margin: 5px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>🌡️ IoT Sensor Dashboard</h1>
+  <p>Temperature: <span id="temp">--</span> °C</p>
+  <p>Humidity: <span id="hum">--</span> %</p>
+  <p>LED is <span id="ledState">OFF</span></p>
+  <button onclick="setLED(true)">Turn LED ON</button>
+  <button onclick="setLED(false)">Turn LED OFF</button>
+
+  <script>
+    const API_BASE = "/api";
+
+    async function fetchData() {
+      try {
+        const res = await fetch(`${API_BASE}/data`);
+        const data = await res.json();
+        document.getElementById("temp").textContent = data.temperature.toFixed(1);
+        document.getElementById("hum").textContent = data.humidity.toFixed(1);
+        document.getElementById("ledState").textContent = data.led ? "ON" : "OFF";
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    }
+
+    async function setLED(state) {
+      try {
+        await fetch(`${API_BASE}/led`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ led: state })
+        });
+        document.getElementById("ledState").textContent = state ? "ON" : "OFF";
+      } catch (err) {
+        console.error("Error setting LED:", err);
+      }
+    }
+
+    setInterval(fetchData, 3000);
+    fetchData();
+  </script>
+</body>
+</html>
